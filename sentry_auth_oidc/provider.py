@@ -11,7 +11,8 @@ from .constants import (
     ISSUER, TOKEN_ENDPOINT,
     CLIENT_SECRET,
     CLIENT_ID,
-    SCOPE, DATA_VERSION
+    SCOPE, DATA_VERSION,
+    MSOIDC
 )
 from .views import FetchUser, OIDCConfigureView
 import logging
@@ -98,16 +99,31 @@ class OIDCProvider(OAuth2Provider):
     def build_identity(self, state):
         data = state['data']
         bearer_token = data['access_token']
-        user_info = self.get_user_info(bearer_token)
-        if not user_info.get('email'):
-            logger.error('Missing email in user endpoint: %s' % data)
-
-        user_data = state['user']
-        return {
-            'id': user_data.get('sub'),
-            'email': user_info.get('email'),
-            'email_verified': user_info.get('email_verified'),
-            'nickname': user_info.get('nickname'),
-            'name': user_info.get('name'),
-            'data': self.get_oauth_data(data),
-        }
+        if MSOIDC:
+            user_data = state['user']
+            try:
+                name = user_data.get('unique_name').split('\\')[1]
+            except IndexError:
+                name = user_data.get('unique_name')
+            identity = {
+                'id': user_data.get('sub'),
+                'email': user_data.get('upn'),
+                'email_verified': user_data.get('upn'),
+                'nickname': user_data.get('unique_name'),
+                'name': name,
+                'data': self.get_oauth_data(data),
+            }
+        else:
+            user_info = self.get_user_info(bearer_token)
+            if not user_info.get('email'):
+                logger.error('Missing email in user endpoint: %s' % data)
+            user_data = state['user']
+            identity = {
+                'id': user_data.get('sub'),
+                'email': user_info.get('email'),
+                'email_verified': user_info.get('email_verified'),
+                'nickname': user_info.get('nickname'),
+                'name': user_info.get('name'),
+                'data': self.get_oauth_data(data)
+            }
+        return identity

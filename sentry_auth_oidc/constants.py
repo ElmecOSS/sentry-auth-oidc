@@ -14,6 +14,8 @@ WELL_KNOWN_SCHEME = "/.well-known/openid-configuration"
 ERR_INVALID_RESPONSE = 'Unable to fetch user information from provider.  Please check the log.'
 ISSUER = None
 
+MSOIDC = getattr(settings, 'MSOIDC', False)
+
 DATA_VERSION = '1'
 
 OIDC_DOMAIN = getattr(settings, 'OIDC_DOMAIN', None)

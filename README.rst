@@ -62,3 +62,16 @@ required endpoints by yourself (autorization_endpoint, token_endpoint, userinfo_
     OIDC_USERINFO_ENDPOINT = "https://www.googleapis.com/oauth2/v3/userinfo" # e.g. for Google
 
     OIDC_ISSUER = "Google"
+
+
+Example For Microsoft ADFS 4
+----------------------------
+
+Follow the Example above and add into your ``sentry.conf.py``:
+
+.. code-block:: python
+
+    MSOIDC = True
+
+This option will skip Userinfo api call and setup user identity from token_id. Userinfo endpoint returns only sub and nothing else.
+https://stackoverflow.com/questions/45058571/adfs-4-0-userinfo-endpoint-returns-only-sub-claim
